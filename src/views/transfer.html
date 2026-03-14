@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Wallet | Transfert</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/transfer.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <nav class="navbar">
+      <a href="./index.html" class="logo">
+        <img src="../../assets/e-Wallet6.gif" alt="Logo E-Wallet">
+      </a>
+      <ul class="nav-links"></ul>
+    </nav>
+  </header>
+
+  <!-- Main -->
+  <main>
+    <section class="hero">
+
+      <!-- Formulaire -->
+      <div class="hero-content">
+        <h1>Transfert</h1>
+        <p>Envoyez de l'argent facilement et en toute sécurité.</p>
+
+        <div id="error"></div>
+
+        <form class="transfer-form">
+
+          <div class="input-group">
+            <select id="beneficiary">
+              <option value="" disabled selected>Choisir un bénéficiaire</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <select id="sourceCard">
+              <option value="" disabled selected>Sélectionner une carte</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <input id="amount" type="number" placeholder="Montant (MAD)" min="1" step="0.01">
+          </div>
+
+          <p id="result"></p>
+
+          <button id="submitbtn" type="button" class="btn btn-primary">
+            Envoyer
+          </button>
+
+        </form>
+
+        <p style="margin-top: 15px; font-size: 0.9rem;">
+          <a href="./dashboard.html" style="color:#3b66f6; font-weight:600;">
+            ← Retour au dashboard
+          </a>
+        </p>
+      </div>
+
+      <!-- Image -->
+      <div class="hero-image">
+        <img src="../../assets/e-Wallet6.gif" alt="Illustration transfert">
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 E-Wallet. Tous droits réservés.</p>
+  </footer>
+
+  <script type="module" src="../controllers/transfer.js"></script>
+</body>
+</html>

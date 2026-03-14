@@ -1,0 +1,43 @@
+/* =====================
+   TRANSFER.CSS
+   Complète styles.css pour la page transfert
+===================== */
+
+/* Select identique au style des inputs */
+.transfer-form select {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  background: #f9faff;
+  font-size: 0.95rem;
+  color: #333;
+  transition: all 0.3s ease;
+  appearance: none;
+  cursor: pointer;
+}
+
+.transfer-form select:focus {
+  outline: none;
+  border-color: #5f6fff;
+  box-shadow: 0 0 0 4px rgba(95, 111, 255, 0.18);
+  background: #ffffff;
+}
+
+/* Message de résultat */
+#result {
+  font-weight: bold;
+  text-align: center;
+  margin-top: 5px;
+}
+
+#result.success { color: #2e7d32; }
+#result.error   { color: #c62828; }
+
+/* Message d'erreur global */
+#error {
+  color: #c62828;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-bottom: 10px;
+}
