@@ -83,8 +83,8 @@ recentTransactions.forEach(transaction => {
 
 
 
-import {getbeneficiaries ,finduserbyaccount,findbeneficiarieByid} from "../Model/database.js";
-const user = JSON.parse(sessionStorage.getItem("currentUser"));
+import { getbeneficiaries, finduserbyaccount, findbeneficiarieByid } from "../models/database.js";
+const user = JSON.parse(sessionStorage.getItem("user"));
 // DOM elements
 const greetingName = document.getElementById("greetingName");
 const currentDate = document.getElementById("currentDate");
@@ -99,19 +99,34 @@ const closeTransferBtn = document.getElementById("closeTransferBtn");
 const cancelTransferBtn = document.getElementById("cancelTransferBtn");
 const beneficiarySelect = document.getElementById("beneficiary");
 const sourceCard = document.getElementById("sourceCard");
-const submitTransferBtn=document.getElementById("submitTransferBtn");
+const submitTransferBtn = document.getElementById("submitTransferBtn");
+
+
+
+const rechargeBtn = document.getElementById("quickTopup");
+const rechargeSection = document.getElementById("rechargePopup");
+const closeRechargeBtn = document.getElementById("closeRechargeBtn");
+const cancelRechargeBtn = document.getElementById("cancelRechargeBtn");
+const rechargeSourceCard = document.getElementById("rechargeSourceCard");
+const submitRechargeBtn = document.getElementById("submitRechargeBtn");
+
 
 // Guard
 if (!user) {
   alert("User not authenticated");
-  window.location.href = "/index.html";
+  window.location.href = "../views/login.html";
 }
 
 // Events
-  transferBtn.addEventListener("click", handleTransfersection);
-  closeTransferBtn.addEventListener("click", closeTransfer);
-  cancelTransferBtn.addEventListener("click", closeTransfer);
-  submitTransferBtn.addEventListener("click",handleTransfer)
+transferBtn.addEventListener("click", handleTransfersection);
+closeTransferBtn.addEventListener("click", closeTransfer);
+cancelTransferBtn.addEventListener("click", closeTransfer);
+submitTransferBtn.addEventListener("click", handleTransfer)
+
+rechargeBtn.addEventListener("click", handleRechargeSection);
+closeRechargeBtn.addEventListener("click", closeRecharge);
+cancelRechargeBtn.addEventListener("click", closeRecharge);
+submitRechargeBtn.addEventListener("click", handleRecharge);
 
 
 // Retrieve dashboard data
@@ -134,31 +149,46 @@ const getDashboardData = () => {
   };
 };
 
-function renderDashboard(){
-const dashboardData = getDashboardData();
-if (dashboardData) {
-  greetingName.textContent = dashboardData.userName;
-  currentDate.textContent = dashboardData.currentDate;
-  solde.textContent = dashboardData.availableBalance;
-  incomeElement.textContent = dashboardData.monthlyIncome;
-  expensesElement.textContent = dashboardData.monthlyExpenses;
-  activecards.textContent = dashboardData.activeCards;
-}
-// Display transactions
-transactionsList.innerHTML = "";
-user.wallet.transactions.forEach(transaction => {
-  const transactionItem = document.createElement("div");
-  transactionItem.className = "transaction-item";
-  transactionItem.innerHTML = `
+function renderDashboard() {
+  const dashboardData = getDashboardData();
+  //console.log("Dashboard data:", dashboardData); // Debug log
+
+  if (dashboardData) {
+    greetingName.textContent = dashboardData.userName;
+    currentDate.textContent = dashboardData.currentDate;
+    solde.textContent = dashboardData.availableBalance;
+    incomeElement.textContent = dashboardData.monthlyIncome;
+    expensesElement.textContent = dashboardData.monthlyExpenses;
+    activecards.textContent = dashboardData.activeCards;
+  }
+  // Display transactions
+  transactionsList.innerHTML = "";
+  user.wallet.transactions.forEach(transaction => {
+    const transactionItem = document.createElement("div");
+    transactionItem.className = "transaction-item";
+    transactionItem.innerHTML = `
     <div>${transaction.date}</div>
     <div>${transaction.amount} MAD</div>
     <div>${transaction.type}</div>
   `;
-  transactionsList.appendChild(transactionItem);
-});
+    transactionsList.appendChild(transactionItem);
+  });
 
 }
 renderDashboard();
+
+
+function handleRechargeSection() {
+  rechargeSection.classList.add("active");
+  document.body.classList.add("popup-open");
+}
+
+function closeRecharge() {
+  rechargeSection.classList.remove("active");
+  document.body.classList.remove("popup-open");
+}
+
+
 
 // Transfer popup
 function closeTransfer() {
@@ -187,12 +217,26 @@ function renderCards() {
   user.wallet.cards.forEach((card) => {
     const option = document.createElement("option");
     option.value = card.numcards;
-    option.textContent = card.type+"****"+card.numcards;
+    option.textContent = card.type + "****" + card.numcards;
     sourceCard.appendChild(option);
   });
 }
 
+
+function rechargerenderCards() {
+  user.wallet.cards.forEach((card) => {
+    const option = document.createElement("option");
+
+    //if(Date.parse(card.expiry) > Date.now()) 
+    option.value = card.numcards;
+
+    option.textContent = card.type + "****" + card.numcards;
+    rechargeSourceCard.appendChild(option);
+  });
+}
+
 renderCards();
+rechargerenderCards();
 
 //###################################  Transfer  #####################################################//
 
@@ -316,7 +360,7 @@ function checkUser(numcompte) {
 function checkSolde(expediteur, amount) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (expediteur.wallet.balance > amount) {
+      if (expediteur.wallet.balance >= amount) {
         resolve("Sufficient balance");
       } else {
         reject(new Error("Insufficient balance"));
@@ -324,6 +368,20 @@ function checkSolde(expediteur, amount) {
     }, 3000);
   });
 }
+
+function checkSoldeRecharge(card, amount) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (card.balance > amount) {
+        resolve("Sufficient balance");
+      } else {
+        reject(new Error("Insufficient balance"));
+      }
+    }, 3000);
+  });
+}
+
+
 
 function updateSolde(expediteur, destinataire, amount) {
   return new Promise((resolve) => {
@@ -335,6 +393,28 @@ function updateSolde(expediteur, destinataire, amount) {
   });
 }
 
+
+function updateSoldeRecharge(destinataire, amount) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      destinataire.wallet.balance += amount;
+      resolve("Update balance done");
+    }, 200);
+  });
+}
+
+function checkDate(card) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (Date.parse(card.expiry) > Date.now()) {
+        resolve("Card is valid");
+      } else {
+        reject(new Error("Invalid card"));
+      }
+    }, 3000);
+  });
+}
+
 function addtransactions(expediteur, destinataire, amount) {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -342,14 +422,14 @@ function addtransactions(expediteur, destinataire, amount) {
         id: Date.now(),
         type: "credit",
         amount: amount,
-        date: new Date().toLocaleString(),
+        date: new Date().toLocaleDateString("sv-SE"),
         from: expediteur.name,
       };
       const debit = {
         id: Date.now(),
         type: "debit",
         amount: amount,
-        date: new Date().toLocaleString(),
+        date: new Date().toLocaleDateString("sv-SE"),
         to: destinataire.name,
       };
       expediteur.wallet.transactions.push(debit);
@@ -359,15 +439,34 @@ function addtransactions(expediteur, destinataire, amount) {
   });
 }
 
+
+function addtransactionsRecharge(destinataire, amount) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const recharge = {
+        id: Date.now(),
+        type: "recharge",
+        amount: amount,
+        date: new Date().toLocaleDateString("sv-SE"),
+        from: destinataire.name,
+      };
+
+      destinataire.wallet.transactions.push(recharge);
+      resolve("Transaction added successfully");
+    }, 3000);
+  });
+}
+
 // **************************************transfer***************************************************//
 
 function transfer(expediteur, numcompte, amount) {
-  checkUser(numcompte)
-    .then((destinataire) => {
+  checkUser(numcompte)//p0
+    .then((destinataire) => { //p1
       console.log("Étape 1: Destinataire trouvé -", destinataire.name);
-      return checkSolde(expediteur, amount).then((soldeMessage) => {
+      return checkSolde(expediteur, amount)//p2
+      .then((soldeMessage) => { //p3
         console.log(soldeMessage);
-        return updateSolde(expediteur, destinataire, amount);
+        return updateSolde(expediteur, destinataire, amount); //p4
       }).then((updateMessage) => {
         console.log(updateMessage);
         return addtransactions(expediteur, destinataire, amount);
@@ -383,16 +482,64 @@ function transfer(expediteur, numcompte, amount) {
 }
 
 function handleTransfer(e) {
- e.preventDefault();
+  e.preventDefault();
   const beneficiaryId = document.getElementById("beneficiary").value;
-  const beneficiaryAccount=findbeneficiarieByid(user.id,beneficiaryId).account;
+  const beneficiaryAccount = findbeneficiarieByid(user.id, beneficiaryId).account;
   const sourceCard = document.getElementById("sourceCard").value;
 
   const amount = Number(document.getElementById("amount").value);
 
-transfer(user, beneficiaryAccount, amount);
+  transfer(user, beneficiaryAccount, amount);
 
-} 
+}
+
+// **************************************recharge***************************************************//
+function recharge(destinataire,card, amount) {
+  checkDate(card)
+    .then((dateMessage) => {
+      console.log(dateMessage);
+      return checkSoldeRecharge(card, amount).then((soldeMessage) => {
+        console.log(soldeMessage);
+        return updateSoldeRecharge(destinataire, amount);
+      }).then((updateMessage) => {
+        console.log(updateMessage);
+        return addtransactionsRecharge(destinataire, amount);
+      });
+    })
+    .then((transactionMessage) => {
+      console.log(transactionMessage);
+      alert("Recharge successful");
+      renderDashboard();
+    })
+    .catch((error) => {
+      console.error("Erreur lors du rechargement :", error.message);
+      alert(error.message);
+    });
+}
+
+
+
+
+function handleRecharge(e) {
+  e.preventDefault();
+  const sourceCard = document.getElementById("rechargeSourceCard").value;
+  const amount = Number(document.getElementById("rechargeAmount").value);
+
+  if (!sourceCard) {
+    alert("Veuillez sélectionner une carte source.");
+    return;
+  }
+
+  const card = user.wallet.cards.find(c => c.numcards === sourceCard);
+
+  //console.log("Selected card number:", sourceCard); // Debug log
+  //console.log("Selected card:", card); // Debug log
+
+  recharge(user, card, amount);
+
+}
+
+
 
 /*
     function func1(number,callback){
