@@ -459,26 +459,27 @@ function addtransactionsRecharge(destinataire, amount) {
 
 // **************************************transfer***************************************************//
 
-function transfer(expediteur, numcompte, amount) {
-  checkUser(numcompte)//p0
-    .then((destinataire) => { //p1
-      console.log("Étape 1: Destinataire trouvé -", destinataire.name);
-      return checkSolde(expediteur, amount)//p2
-      .then((soldeMessage) => { //p3
-        console.log(soldeMessage);
-        return updateSolde(expediteur, destinataire, amount); //p4
-      }).then((updateMessage) => {
-        console.log(updateMessage);
-        return addtransactions(expediteur, destinataire, amount);
-      });
-    })
-    .then((transactionMessage) => {
-      console.log(transactionMessage);
-      renderDashboard();
-    })
-    .catch((error) => {
-      console.error("Erreur lors du transfert :", error.message);
-    });
+
+
+
+async function transfer(expediteur, numcompte, amount) {
+  try {
+    const destinataire = await checkUser(numcompte);
+    console.log("Étape 1: Destinataire trouvé -", destinataire.name);
+    
+    const soldeMessage = await checkSolde(expediteur, amount);
+    console.log(soldeMessage);
+    
+    const updateMessage = await updateSolde(expediteur, destinataire, amount);
+    console.log(updateMessage);
+    
+    const transactionMessage = await addtransactions(expediteur, destinataire, amount);
+    console.log(transactionMessage);
+    
+    renderDashboard();
+  } catch (error) {
+    console.error("Erreur lors du transfert :", error.message);
+  }
 }
 
 function handleTransfer(e) {
@@ -494,31 +495,29 @@ function handleTransfer(e) {
 }
 
 // **************************************recharge***************************************************//
-function recharge(destinataire,card, amount) {
-  checkDate(card)
-    .then((dateMessage) => {
-      console.log(dateMessage);
-      return checkSoldeRecharge(card, amount).then((soldeMessage) => {
-        console.log(soldeMessage);
-        return updateSoldeRecharge(destinataire, amount);
-      }).then((updateMessage) => {
-        console.log(updateMessage);
-        return addtransactionsRecharge(destinataire, amount);
-      });
-    })
-    .then((transactionMessage) => {
-      console.log(transactionMessage);
-      alert("Recharge successful");
-      renderDashboard();
-    })
-    .catch((error) => {
-      console.error("Erreur lors du rechargement :", error.message);
-      alert(error.message);
-    });
+
+
+async function recharge(destinataire, card, amount) {
+  try {
+    const dateMessage = await checkDate(card);
+    console.log(dateMessage);
+    
+    const soldeMessage = await checkSoldeRecharge(card, amount);
+    console.log(soldeMessage);
+    
+    const updateMessage = await updateSoldeRecharge(destinataire, amount);
+    console.log(updateMessage);
+    
+    const transactionMessage = await addtransactionsRecharge(destinataire, amount);
+    console.log(transactionMessage);
+    
+    alert("Recharge successful");
+    renderDashboard();
+  } catch (error) {
+    console.error("Erreur lors du rechargement :", error.message);
+    alert(error.message);
+  }
 }
-
-
-
 
 function handleRecharge(e) {
   e.preventDefault();
